@@ -44,6 +44,7 @@ import org.apache.hadoop.hbase.client.ResultScanner;
 //import org.apache.hadoop.hbase.io.RowResult;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.hbase.HBaseConfiguration;
+import edu.brown.cs.systems.xtrace.XTrace;
 
 /**
  * HBase client for YCSB framework
@@ -59,6 +60,7 @@ public class HBaseClient extends com.yahoo.ycsb.DB
     public String _table="";
     public HTable _hTable=null;
     public String _columnFamily="";
+    public int tenantClass=99;
     public byte _columnFamilyBytes[];
 
     public static final int Ok=0;
@@ -88,6 +90,8 @@ public class HBaseClient extends com.yahoo.ycsb.DB
         }
       _columnFamilyBytes = Bytes.toBytes(_columnFamily);
 
+       tenantClass = Integer.parseInt(getProperties().getProperty("tenant"));
+       XTrace.setTenantClass(tenantClass);
     }
 
     /**

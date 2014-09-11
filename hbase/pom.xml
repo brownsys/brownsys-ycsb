@@ -13,7 +13,7 @@
   <dependencies>
     <dependency>
       <groupId>org.apache.hbase</groupId>
-      <artifactId>hbase</artifactId>
+      <artifactId>hbase-client</artifactId>
       <version>${hbase.version}</version>
     </dependency>
     <dependency>
@@ -21,8 +21,12 @@
       <artifactId>core</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>edu.brown.cs.systems</groupId>
+      <artifactId>xtrace</artifactId>
+      <version>3.0</version>
+    </dependency>
   </dependencies>
-
   <build>
     <plugins>
      <plugin>

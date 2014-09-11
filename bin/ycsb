@@ -88,6 +88,16 @@ def get_ycsb_home():
         dir = os.path.join(dir, os.path.pardir)
     return os.path.abspath(dir)
 
+def get_retro_cp():
+    hdfs = os.environ['HADOOP_HOME'] + "/share/hadoop/hdfs/*"
+    hdfslib = os.environ['HADOOP_HOME'] + "/share/hadoop/hdfs/lib/*"
+    hdfsconf = os.environ['HADOOP_CONFIG']
+    hbaseconf = os.environ['HBASE_CONFIG']
+    retroconf = os.environ['RETRO_CONFIG']
+    cp_prefix = "{}:{}:{}:{}:{}:".format(retroconf, hbaseconf, hdfsconf, hdfslib, hdfs)
+    print "Retro cp prefix is: " + cp_prefix
+    return cp_prefix
+
 if len(sys.argv) < 3:
     usage()
 if sys.argv[1] not in COMMANDS:
@@ -103,7 +113,7 @@ database = sys.argv[2]
 db_classname = DATABASES[database]
 options = sys.argv[3:]
 
-ycsb_command = ["java", "-cp", ":".join(find_jars(ycsb_home, database)), \
+ycsb_command = ["java", "-cp", get_retro_cp() + (":".join(find_jars(ycsb_home, database))), \
                 COMMANDS[sys.argv[1]]["main"], "-db", db_classname] + options
 if command:
     ycsb_command.append(command)

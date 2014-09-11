@@ -2,7 +2,6 @@
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 <!--
 /**
- * Copyright 2009 The Apache Software Foundation
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -24,18 +23,14 @@
 <configuration>
   <property>
     <name>hbase.rootdir</name>
-    <value>hdfs://<HBASE_MASTER_SERVER>:20001/hbase</value>
-    <description>The directory shared by region servers.
-    </description>
+    <value>hdfs://hop06:9000/hbase</value>
   </property>
   <property>
-    <name>hbase.master</name>
-    <value><HBASE_MASTER_SERVER>:60000</value>
-    <description>The host and port that the HBase master runs at.
-    </description>
+    <name>hbase.cluster.distributed</name>
+    <value>true</value>
   </property>
   <property>
     <name>hbase.zookeeper.quorum</name>
-    <value><HBASE_MASTER_SERVER></value>
+    <value>hop05</value>
   </property>
 </configuration>
