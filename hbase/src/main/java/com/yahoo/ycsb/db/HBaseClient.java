@@ -18,32 +18,39 @@
 package com.yahoo.ycsb.db;
 
 
-import com.yahoo.ycsb.DBException;
-import com.yahoo.ycsb.ByteIterator;
-import com.yahoo.ycsb.ByteArrayByteIterator;
-import com.yahoo.ycsb.StringByteIterator;
-
 import java.io.IOException;
-import java.util.*;
-//import java.util.HashMap;
-//import java.util.Properties;
-//import java.util.Set;
-//import java.util.Vector;
+import java.util.ConcurrentModificationException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Random;
+import java.util.Set;
+import java.util.Vector;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.KeyValue;
-import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.client.Delete;
 //import org.apache.hadoop.hbase.client.Scanner;
 import org.apache.hadoop.hbase.client.Get;
+import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.client.Delete;
-import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
+import org.apache.hadoop.hbase.filter.FilterList;
+import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
 //import org.apache.hadoop.hbase.io.Cell;
 //import org.apache.hadoop.hbase.io.RowResult;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.apache.hadoop.hbase.HBaseConfiguration;
+
+import com.yahoo.ycsb.ByteArrayByteIterator;
+import com.yahoo.ycsb.ByteIterator;
+import com.yahoo.ycsb.DBException;
+import com.yahoo.ycsb.workloads.CoreWorkload;
+
 import edu.brown.cs.systems.xtrace.XTrace;
 
 /**
@@ -62,6 +69,10 @@ public class HBaseClient extends com.yahoo.ycsb.DB
     public String _columnFamily="";
     public int tenantClass=99;
     public byte _columnFamilyBytes[];
+    
+    public int fieldcount = 10;
+    
+    private FilterList list = null;
 
     public static final int Ok=0;
     public static final int ServerError=-1;
@@ -88,10 +99,31 @@ public class HBaseClient extends com.yahoo.ycsb.DB
             System.err.println("Error, must specify a columnfamily for HBase table");
             throw new DBException("No columnfamily specified");
         }
-      _columnFamilyBytes = Bytes.toBytes(_columnFamily);
+        _columnFamilyBytes = Bytes.toBytes(_columnFamily);
 
-       tenantClass = Integer.parseInt(getProperties().getProperty("tenant"));
-       XTrace.setTenantClass(tenantClass);
+        tenantClass = Integer.parseInt(getProperties().getProperty("tenant"));
+        XTrace.setTenantClass(tenantClass);
+
+
+        fieldcount=Integer.parseInt(getProperties().getProperty(CoreWorkload.FIELD_COUNT_PROPERTY,CoreWorkload.FIELD_COUNT_PROPERTY_DEFAULT));
+
+
+        int numfilters = Integer.parseInt(getProperties().getProperty("numfilters", "0"));
+
+        Random r = new Random();
+        list = new FilterList(FilterList.Operator.MUST_PASS_ONE);
+
+        for (int i = 0; i < numfilters; i++) {
+        	SingleColumnValueFilter filter1 = new SingleColumnValueFilter(
+        			_columnFamilyBytes,
+        			("field"+r.nextInt(fieldcount)).getBytes(),
+        			CompareOp.EQUAL,
+        			Bytes.toBytes("SDFU@#(FSLDKJ")
+        			);
+        	list.addFilter(filter1);
+        }
+        
+        System.out.println("Created FilterList with " + numfilters + " filters");
     }
 
     /**
@@ -187,7 +219,7 @@ public class HBaseClient extends com.yahoo.ycsb.DB
   }
     return Ok;
     }
-
+    
     /**
      * Perform a range scan for a set of records in the database. Each field/value pair from the result will be stored in a HashMap.
      *
@@ -216,6 +248,7 @@ public class HBaseClient extends com.yahoo.ycsb.DB
         }
 
         Scan s = new Scan(Bytes.toBytes(startkey));
+        s.setFilter(list);
         //HBase has no record limit.  Here, assume recordcount is small enough to bring back in one call.
         //We get back recordcount records
         s.setCaching(recordcount);
