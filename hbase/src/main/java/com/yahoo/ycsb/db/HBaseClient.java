@@ -112,7 +112,7 @@ public class HBaseClient extends com.yahoo.ycsb.DB
         int regex_i =Integer.parseInt(getProperties().getProperty("regex", "2"));
         
 
-        String regex = String.format("(.{1,%d}){1,%d}dsfusewuf",regex_i, regex_i);
+        String regex = String.format("(.{1,%d}){1,%d}sdjf02jf0dsjf",regex_i, regex_i);
    	 	RegexStringComparator regex_comparator = new RegexStringComparator(regex);
 
         int numfilters = Integer.parseInt(getProperties().getProperty("numfilters", "0"));
