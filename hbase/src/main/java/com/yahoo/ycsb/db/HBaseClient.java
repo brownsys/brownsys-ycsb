@@ -41,7 +41,9 @@ import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
 import org.apache.hadoop.hbase.filter.FilterList;
+import org.apache.hadoop.hbase.filter.RegexStringComparator;
 import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
+import org.apache.hadoop.hbase.filter.ValueFilter;
 //import org.apache.hadoop.hbase.io.Cell;
 //import org.apache.hadoop.hbase.io.RowResult;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -107,6 +109,11 @@ public class HBaseClient extends com.yahoo.ycsb.DB
 
         fieldcount=Integer.parseInt(getProperties().getProperty(CoreWorkload.FIELD_COUNT_PROPERTY,CoreWorkload.FIELD_COUNT_PROPERTY_DEFAULT));
 
+        int regex_i =Integer.parseInt(getProperties().getProperty("regex", "2"));
+        
+
+        String regex = String.format("(.{1,%d}){1,%d}dsfusewuf",regex_i, regex_i);
+   	 	RegexStringComparator regex_comparator = new RegexStringComparator(regex);
 
         int numfilters = Integer.parseInt(getProperties().getProperty("numfilters", "0"));
 
@@ -114,12 +121,18 @@ public class HBaseClient extends com.yahoo.ycsb.DB
         list = new FilterList(FilterList.Operator.MUST_PASS_ONE);
 
         for (int i = 0; i < numfilters; i++) {
-        	SingleColumnValueFilter filter1 = new SingleColumnValueFilter(
-        			_columnFamilyBytes,
-        			("field"+r.nextInt(fieldcount)).getBytes(),
-        			CompareOp.EQUAL,
-        			Bytes.toBytes("SDFU@#(FSLDKJ")
-        			);
+         	SingleColumnValueFilter filter1 = new SingleColumnValueFilter(
+		 			_columnFamilyBytes,
+		 			("field"+r.nextInt(fieldcount)).getBytes(),
+		 			CompareOp.EQUAL,
+		 			regex_comparator
+		 			);
+//        	SingleColumnValueFilter filter1 = new SingleColumnValueFilter(
+//        			_columnFamilyBytes,
+//        			("field"+r.nextInt(fieldcount)).getBytes(),
+//        			CompareOp.EQUAL,
+//        			Bytes.toBytes("SDFU@#(FSLDKJ")
+//        			);
         	list.addFilter(filter1);
         }
         
