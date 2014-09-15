@@ -53,6 +53,9 @@ import com.yahoo.ycsb.ByteIterator;
 import com.yahoo.ycsb.DBException;
 import com.yahoo.ycsb.workloads.CoreWorkload;
 
+import edu.brown.cs.systems.resourcereporting.LocalResources;
+import edu.brown.cs.systems.resourcereporting.Resource.Operation;
+import edu.brown.cs.systems.resourcereporting.aggregators.HDFSAggregator;
 import edu.brown.cs.systems.xtrace.XTrace;
 
 /**
@@ -82,6 +85,8 @@ public class HBaseClient extends com.yahoo.ycsb.DB
     public static final int NoMatchingRecord=-3;
 
     public static final Object tableLock = new Object();
+  
+    public static final HDFSAggregator agg = LocalResources.getHDFSAggregator();
 
     /**
      * Initialize any state for this DB.
@@ -207,7 +212,10 @@ public class HBaseClient extends com.yahoo.ycsb.DB
               g.addColumn(_columnFamilyBytes, Bytes.toBytes(field));
             }
           }
+          long begin = System.nanoTime();
             r = _hTable.get(g);
+          long duration = System.nanoTime() - begin;
+          agg.startedAndFinished(Operation.READ, tenantClass, r.size(), duration);
         }
         catch (IOException e)
         {
@@ -281,34 +289,36 @@ public class HBaseClient extends com.yahoo.ycsb.DB
 
         //get results
         ResultScanner scanner = null;
+        long begin = System.nanoTime();
+        long totalRead = 0;
         try {
             scanner = _hTable.getScanner(s);
             int numResults = 0;
             for (Result rr = scanner.next(); rr != null; rr = scanner.next())
             {
-                //get row key
-                String key = Bytes.toString(rr.getRow());
-                if (_debug)
-                {
-                    System.out.println("Got scan result for key: "+key);
-                }
-
-                HashMap<String,ByteIterator> rowResult = new HashMap<String, ByteIterator>();
-
-                for (KeyValue kv : rr.raw()) {
-                  rowResult.put(
-                      Bytes.toString(kv.getQualifier()),
-                      new ByteArrayByteIterator(kv.getValue()));
-                }
-                //add rowResult to result vector
-                result.add(rowResult);
+//                //get row key
+//                String key = Bytes.toString(rr.getRow());
+//                if (_debug)
+//                {
+//                    System.out.println("Got scan result for key: "+key);
+//                }
+//
+//                HashMap<String,ByteIterator> rowResult = new HashMap<String, ByteIterator>();
+//
+//                for (KeyValue kv : rr.raw()) {
+//                  rowResult.put(
+//                      Bytes.toString(kv.getQualifier()),
+//                      new ByteArrayByteIterator(kv.getValue()));
+//                }
+//                //add rowResult to result vector
+//                result.add(rowResult);
                 numResults++;
                 if (numResults >= recordcount) //if hit recordcount, bail out
                 {
                     break;
                 }
+                totalRead += rr.size();
             } //done with row
-
         }
 
         catch (IOException e) {
@@ -321,6 +331,8 @@ public class HBaseClient extends com.yahoo.ycsb.DB
 
         finally {
             scanner.close();
+	        long duration = System.nanoTime() - begin;
+	        agg.startedAndFinished(Operation.READ, tenantClass, totalRead, duration);
         }
 
         return Ok;
