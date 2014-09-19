@@ -37,5 +37,5 @@ readproportion=0
 updateproportion=0
 scanproportion=1
 insertproportion=0
-minscanlength=4000
-maxscanlength=4000
+minscanlength=16000
+maxscanlength=16000
