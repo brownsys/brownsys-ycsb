@@ -77,6 +77,8 @@ public class HBaseClient extends com.yahoo.ycsb.DB
     
     public int fieldcount = 10;
     
+    public final int scanlength;
+    
     private FilterList list = null;
 
     public static final int Ok=0;
@@ -132,16 +134,20 @@ public class HBaseClient extends com.yahoo.ycsb.DB
 		 			CompareOp.EQUAL,
 		 			regex_comparator
 		 			);
-//        	SingleColumnValueFilter filter1 = new SingleColumnValueFilter(
-//        			_columnFamilyBytes,
-//        			("field"+r.nextInt(fieldcount)).getBytes(),
-//        			CompareOp.EQUAL,
-//        			Bytes.toBytes("SDFU@#(FSLDKJ")
-//        			);
         	list.addFilter(filter1);
         }
         
+
+    	SingleColumnValueFilter zeroresults = new SingleColumnValueFilter(
+    			_columnFamilyBytes,
+    			("field"+r.nextInt(fieldcount)).getBytes(),
+    			CompareOp.EQUAL,
+    			Bytes.toBytes("SDFU@#(FSLDKJ")
+    			);
+    	list.addFilter(zeroresults);
+        
         System.out.println("Created FilterList with " + numfilters + " filters");
+
     }
 
     /**
