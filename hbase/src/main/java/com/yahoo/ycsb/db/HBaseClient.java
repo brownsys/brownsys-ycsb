@@ -77,8 +77,6 @@ public class HBaseClient extends com.yahoo.ycsb.DB
     
     public int fieldcount = 10;
     
-    public final int scanlength;
-    
     private FilterList list = null;
 
     public static final int Ok=0;
