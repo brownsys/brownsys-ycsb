@@ -79,6 +79,8 @@ public class HBaseClient extends com.yahoo.ycsb.DB
     
     private FilterList list = null;
 
+    private int recordcount;
+
     public static final int Ok=0;
     public static final int ServerError=-1;
     public static final int HttpError=-2;
@@ -113,6 +115,7 @@ public class HBaseClient extends com.yahoo.ycsb.DB
 
 
         fieldcount=Integer.parseInt(getProperties().getProperty(CoreWorkload.FIELD_COUNT_PROPERTY,CoreWorkload.FIELD_COUNT_PROPERTY_DEFAULT));
+        recordcount=Integer.parseInt(getProperties().getProperty(CoreWorkload.MAX_SCAN_LENGTH_PROPERTY,CoreWorkload.MAX_SCAN_LENGTH_PROPERTY_DEFAULT));
 
         int regex_i =Integer.parseInt(getProperties().getProperty("regex", "2"));
 
@@ -285,6 +288,8 @@ public class HBaseClient extends com.yahoo.ycsb.DB
                 return ServerError;
             }
         }
+        
+        recordcount = this.recordcount;
 
         Scan s = new Scan(Bytes.toBytes(startkey));
         if (list!=null)
