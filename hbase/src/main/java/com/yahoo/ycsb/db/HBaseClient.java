@@ -126,8 +126,7 @@ public class HBaseClient extends com.yahoo.ycsb.DB
         if (numfilters > 0 || noresults) {
   
           Random r = new Random();
-          if (noresults)
-            list = new FilterList(FilterList.Operator.MUST_PASS_ONE);
+          list = new FilterList(FilterList.Operator.MUST_PASS_ONE);
   
           for (int i = 0; i < numfilters; i++) {
            	SingleColumnValueFilter filter1 = new SingleColumnValueFilter(
