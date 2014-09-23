@@ -126,7 +126,8 @@ public class HBaseClient extends com.yahoo.ycsb.DB
         if (numfilters > 0 || noresults) {
   
           Random r = new Random();
-          list = new FilterList(FilterList.Operator.MUST_PASS_ONE);
+          if (noresults)
+            list = new FilterList(FilterList.Operator.MUST_PASS_ONE);
   
           for (int i = 0; i < numfilters; i++) {
            	SingleColumnValueFilter filter1 = new SingleColumnValueFilter(
@@ -140,13 +141,21 @@ public class HBaseClient extends com.yahoo.ycsb.DB
           
   
           if (noresults) {
-  	    	SingleColumnValueFilter zeroresults = new SingleColumnValueFilter(
-  	    			_columnFamilyBytes,
-  	    			("field"+r.nextInt(fieldcount)).getBytes(),
-  	    			CompareOp.EQUAL,
-  	    			Bytes.toBytes("SDFU@#(FSLDKJ")
-  	    			);
-  	    	list.addFilter(zeroresults);
+    	    	SingleColumnValueFilter zeroresults = new SingleColumnValueFilter(
+    	    			_columnFamilyBytes,
+    	    			("field"+r.nextInt(fieldcount)).getBytes(),
+    	    			CompareOp.EQUAL,
+    	    			Bytes.toBytes("SDFU@#(FSLDKJ")
+    	    			);
+    	    	list.addFilter(zeroresults);
+          } else {
+            SingleColumnValueFilter zeroresults = new SingleColumnValueFilter(
+                _columnFamilyBytes,
+                ("field"+r.nextInt(fieldcount)).getBytes(),
+                CompareOp.NOT_EQUAL,
+                Bytes.toBytes("SDFU@#(FSLDKJ")
+                );
+            list.addFilter(zeroresults);
           }
           
           System.out.println("Created FilterList with " + numfilters + " filters");
