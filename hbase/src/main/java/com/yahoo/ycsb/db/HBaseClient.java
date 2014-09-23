@@ -115,36 +115,42 @@ public class HBaseClient extends com.yahoo.ycsb.DB
         fieldcount=Integer.parseInt(getProperties().getProperty(CoreWorkload.FIELD_COUNT_PROPERTY,CoreWorkload.FIELD_COUNT_PROPERTY_DEFAULT));
 
         int regex_i =Integer.parseInt(getProperties().getProperty("regex", "2"));
-        
+
+        boolean noresults=Boolean.parseBoolean(getProperties().getProperty("noresults", "true"));
 
         String regex = String.format("(.{1,%d}){1,%d}sdjf02jf0dsjf",regex_i, regex_i);
    	 	RegexStringComparator regex_comparator = new RegexStringComparator(regex);
 
         int numfilters = Integer.parseInt(getProperties().getProperty("numfilters", "0"));
-
-        Random r = new Random();
-        list = new FilterList(FilterList.Operator.MUST_PASS_ONE);
-
-        for (int i = 0; i < numfilters; i++) {
-         	SingleColumnValueFilter filter1 = new SingleColumnValueFilter(
-		 			_columnFamilyBytes,
-		 			("field"+r.nextInt(fieldcount)).getBytes(),
-		 			CompareOp.EQUAL,
-		 			regex_comparator
-		 			);
-        	list.addFilter(filter1);
+        
+        if (numfilters > 0 || noresults) {
+  
+          Random r = new Random();
+          list = new FilterList(FilterList.Operator.MUST_PASS_ONE);
+  
+          for (int i = 0; i < numfilters; i++) {
+           	SingleColumnValueFilter filter1 = new SingleColumnValueFilter(
+  		 			_columnFamilyBytes,
+  		 			("field"+r.nextInt(fieldcount)).getBytes(),
+  		 			CompareOp.EQUAL,
+  		 			regex_comparator
+  		 			);
+          	list.addFilter(filter1);
+          }
+          
+  
+          if (noresults) {
+  	    	SingleColumnValueFilter zeroresults = new SingleColumnValueFilter(
+  	    			_columnFamilyBytes,
+  	    			("field"+r.nextInt(fieldcount)).getBytes(),
+  	    			CompareOp.EQUAL,
+  	    			Bytes.toBytes("SDFU@#(FSLDKJ")
+  	    			);
+  	    	list.addFilter(zeroresults);
+          }
+          
+          System.out.println("Created FilterList with " + numfilters + " filters");
         }
-        
-
-    	SingleColumnValueFilter zeroresults = new SingleColumnValueFilter(
-    			_columnFamilyBytes,
-    			("field"+r.nextInt(fieldcount)).getBytes(),
-    			CompareOp.EQUAL,
-    			Bytes.toBytes("SDFU@#(FSLDKJ")
-    			);
-    	list.addFilter(zeroresults);
-        
-        System.out.println("Created FilterList with " + numfilters + " filters");
 
     }
 
@@ -273,7 +279,8 @@ public class HBaseClient extends com.yahoo.ycsb.DB
         }
 
         Scan s = new Scan(Bytes.toBytes(startkey));
-        s.setFilter(list);
+        if (list!=null)
+          s.setFilter(list);
         //HBase has no record limit.  Here, assume recordcount is small enough to bring back in one call.
         //We get back recordcount records
         s.setCaching(recordcount);
