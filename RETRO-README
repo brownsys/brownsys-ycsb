@@ -1,0 +1,9 @@
+Create table for retro workloads:
+
+hbase shell
+
+create 'usertable', 'family', {SPLITS => (1..300).map {|i| "user#{1000+i*(9999-1000)/200}"}, MAX_FILESIZE => 4*1024**3}
+
+bin/ycsb load hbase -P workloads/retro-read -p insertstart=0 -p insertcount=5000000 -p columnfamily=family -p numfilters=0 -p regex=1 -p tenant=1
+
+
