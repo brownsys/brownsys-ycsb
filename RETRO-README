@@ -1,3 +1,5 @@
+Build YCSB!
+
 Create table for retro workloads:
 
 hbase shell
