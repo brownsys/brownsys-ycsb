@@ -342,6 +342,7 @@ public class HBaseClient extends com.yahoo.ycsb.DB
                     break;
                 }
                 totalRead += rr.size();
+    	        agg.startedAndFinished(Operation.OPEN, tenantClass, 1, 0);
             } //done with row
         }
 
