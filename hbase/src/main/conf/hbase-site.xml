@@ -23,7 +23,7 @@
 <configuration>
   <property>
     <name>hbase.rootdir</name>
-    <value>hdfs://hop06:9000/hbase</value>
+    <value>hdfs://hdfs-nn:9000/hbase</value>
   </property>
   <property>
     <name>hbase.cluster.distributed</name>
@@ -31,6 +31,6 @@
   </property>
   <property>
     <name>hbase.zookeeper.quorum</name>
-    <value>hop05</value>
+    <value>hdfs-nn</value>
   </property>
 </configuration>
