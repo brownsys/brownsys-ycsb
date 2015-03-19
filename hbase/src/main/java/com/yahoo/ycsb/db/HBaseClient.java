@@ -296,7 +296,7 @@ public class HBaseClient extends com.yahoo.ycsb.DB
           s.setFilter(list);
         //HBase has no record limit.  Here, assume recordcount is small enough to bring back in one call.
         //We get back recordcount records
-        s.setCaching(recordcount);
+        s.setCaching(20);
 
         //add specified fields or else all fields
         if (fields == null)
