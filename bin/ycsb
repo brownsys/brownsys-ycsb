@@ -94,7 +94,8 @@ def get_retro_cp():
     hdfsconf = os.environ['HADOOP_CONFIG']
     hbaseconf = os.environ['HBASE_CONFIG']
     retroconf = os.environ['RETRO_CONFIG']
-    cp_prefix = "{}:{}:{}:{}:{}:".format(retroconf, hbaseconf, hdfsconf, hdfslib, hdfs)
+    tools = os.environ['JAVA_HOME'] + "/lib/tools.jar"
+    cp_prefix = "{}:{}:{}:{}:{}:{}:".format(retroconf, hbaseconf, hdfsconf, hdfslib, hdfs, tools)
     print "Retro cp prefix is: " + cp_prefix
     return cp_prefix
 
@@ -113,7 +114,7 @@ database = sys.argv[2]
 db_classname = DATABASES[database]
 options = sys.argv[3:]
 
-ycsb_command = ["java", "-cp", get_retro_cp() + (":".join(find_jars(ycsb_home, database))), \
+ycsb_command = ["java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0", "-cp", get_retro_cp() + (":".join(find_jars(ycsb_home, database))), \
                 COMMANDS[sys.argv[1]]["main"], "-db", db_classname] + options
 if command:
     ycsb_command.append(command)
