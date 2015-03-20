@@ -296,7 +296,7 @@ public class HBaseClient extends com.yahoo.ycsb.DB
           s.setFilter(list);
         //HBase has no record limit.  Here, assume recordcount is small enough to bring back in one call.
         //We get back recordcount records
-        s.setCaching(20);
+        s.setCaching(Math.min(recordcount, 1000));
 
         //add specified fields or else all fields
         if (fields == null)
@@ -358,6 +358,7 @@ public class HBaseClient extends com.yahoo.ycsb.DB
             scanner.close();
 	        long duration = System.nanoTime() - begin;
 	        agg.startedAndFinished(Operation.READ, tenantClass, totalRead, duration);
+	        LocalResources.reportImmediately(agg, Operation.WRITE, tenantClass, totalRead, duration);
         }
 
         return Ok;
